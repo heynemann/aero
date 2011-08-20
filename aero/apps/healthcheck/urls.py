@@ -5,4 +5,8 @@
 # http://www.opensource.org/licenses/mit-license
 # Copyright (c) 2011 Bernardo Heynemann heynemann@gmail.com
 
-from aero.app import AeroApp
+from aero.apps.healthcheck.handlers import HealthcheckHandler
+
+urls = (
+    (r'/healthcheck', HealthcheckHandler),
+)

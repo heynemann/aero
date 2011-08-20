@@ -5,4 +5,8 @@
 # http://www.opensource.org/licenses/mit-license
 # Copyright (c) 2011 Bernardo Heynemann heynemann@gmail.com
 
-from aero.app import AeroApp
+import tornado.web
+
+class HealthcheckHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.write('WORKING')
