@@ -5,7 +5,11 @@
 # http://www.opensource.org/licenses/mit-license
 # Copyright (c) 2011 Bernardo Heynemann heynemann@gmail.com
 
+from os.path import abspath, join, dirname, exists
+
 import tornado.web
+
+from aero.template import AppTemplateLoader
 
 class AeroApp(tornado.web.Application):
 
@@ -21,6 +25,7 @@ class AeroApp(tornado.web.Application):
                 handlers.append(url)
 
         settings = {
+            "template_loader": AppTemplateLoader(self)
             #"cookie_secret": "QmVybmFyZG8gSGV5bmVtYW5uIE5hc2NlbnRlcyBkYSBTaWx2YQ==",
             #"login_url": "/login",
             #"template_path": join(dirname(__file__), "templates"),
@@ -44,9 +49,14 @@ class AeroApp(tornado.web.Application):
             for url in urls_module.urls:
                 urls.append(url)
 
+        template_path = abspath(join(dirname(module.__file__), 'templates'))
+        has_templates = exists(template_path)
+
         return {
             'name': app_name,
             'module': module,
             'urls_module': urls,
-            'urls': urls
+            'urls': urls,
+            'has_templates': has_templates,
+            'template_path': template_path
         }

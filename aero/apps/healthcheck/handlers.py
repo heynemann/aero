@@ -9,4 +9,4 @@ import tornado.web
 
 class HealthcheckHandler(tornado.web.RequestHandler):
     def get(self):
-        self.write('WORKING')
+        self.render('aero/healthcheck/working.html')
