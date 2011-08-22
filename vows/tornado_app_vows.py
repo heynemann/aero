@@ -46,5 +46,8 @@ class AeroAppVows(Vows.Context):
 if __name__ == '__main__':
     AeroApp(apps=[
         'aero.apps.healthcheck'
-    ]).listen(8888)
+    ], **{
+        'template_path': abspath(join(dirname(__file__), 'templates'))
+    }).listen(8888)
+
     tornado.ioloop.IOLoop.instance().start()
