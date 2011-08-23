@@ -41,7 +41,7 @@ class AeroStaticFileHandler(StaticFileHandler):
             for app in self.apps:
                 if not app['has_static']:
                     continue
-                file_path = abspath(join(app['static_dir'].rstrip('/'), path))
+                file_path = abspath(join(app['static_path'].rstrip('/'), path))
                 if exists(file_path):
                     break
 

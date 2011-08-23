@@ -38,11 +38,11 @@ class AeroApp(tornado.web.Application):
 
             settings['template_loader'] = self.loader
 
+        handlers.append((r"/static/(.*)", AeroStaticFileHandler, {
+            "path": "static_path" in settings and settings['static_path'] or None,
+            "apps": self.apps
+        }))
         if 'static_path' in settings:
-            handlers.append((r"/static/(.*)", AeroStaticFileHandler, {
-                "path": "static_path" in settings and settings['static_path'] or None,
-                "apps": self.apps
-            }))
             del settings['static_path']
 
         #"cookie_secret": "QmVybmFyZG8gSGV5bmVtYW5uIE5hc2NlbnRlcyBkYSBTaWx2YQ==",
@@ -59,13 +59,18 @@ class AeroApp(tornado.web.Application):
             print "Could not import app %s! Error:" % app_name
             raise err
 
-        urls = []
-        urls_app_name = '%s.urls' % app_name
-        urls_module = reduce(getattr, urls_app_name.split('.')[1:], __import__(urls_app_name))
+        app_path = abspath(dirname(module.__file__))
 
-        if hasattr(urls_module, 'urls'):
-            for url in urls_module.urls:
-                urls.append(url)
+        urls = []
+        urls_module = None
+
+        if exists(join(app_path.rstrip('/'), 'urls.py')):
+            urls_app_name = '%s.urls' % app_name
+            urls_module = reduce(getattr, urls_app_name.split('.')[1:], __import__(urls_app_name))
+
+            if hasattr(urls_module, 'urls'):
+                for url in urls_module.urls:
+                    urls.append(url)
 
         template_path = abspath(join(dirname(module.__file__), 'templates'))
         has_templates = exists(template_path)
@@ -76,6 +81,7 @@ class AeroApp(tornado.web.Application):
         return {
             'name': app_name,
             'module': module,
+            'path': app_path,
             'urls_module': urls_module,
             'urls': urls,
             'has_templates': has_templates,
