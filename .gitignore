@@ -4,3 +4,4 @@ build
 dist
 pyVows.egg-info
 .DS_Store
+*.egg-info

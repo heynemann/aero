@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# pyVows testing engine
-# https://github.com/heynemann/pyvows
-
 # Licensed under the MIT license:
 # http://www.opensource.org/licenses/mit-license
 # Copyright (c) 2011 Bernardo Heynemann heynemann@gmail.com
@@ -13,7 +10,7 @@ from aero.version import __version__
 
 setup(
     name = 'aero',
-    version = '.'.join([str(item) for item in __version__]),
+    version = '.'.join([str(item) for item in __version__]) + 'a',
     description = "aero adds django-like apps support to tornado and automates common actions",
     long_description = open('README.rst').read(),
     keywords = 'tornado aero app django',
