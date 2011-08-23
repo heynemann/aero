@@ -13,29 +13,34 @@ from aero.template import AppTemplateLoader
 
 class AeroApp(tornado.web.Application):
 
-    def __init__(self, handlers=[], apps=[], **settings):
+    def __init__(self, handlers=[], **settings):
         handlers = list(handlers)
+
         self.apps = []
         if not settings:
             settings = {}
 
-        for app_module_name in apps:
-            self.apps.append(self.__load_app(app_module_name))
+        if 'apps' in settings:
+            apps = settings['apps']
 
-        for app in self.apps:
-            for url in app['urls']:
-                handlers.append(url)
+            for app_module_name in apps:
+                self.apps.append(self.__load_app(app_module_name))
 
-        if 'template_path' in settings:
-            self.loader = AppTemplateLoader(self, settings['template_path'])
-        else:
-            self.loader = AppTemplateLoader(self)
+            for app in self.apps:
+                for url in app['urls']:
+                    handlers.append(url)
 
-        settings['template_loader'] = self.loader
-            #"cookie_secret": "QmVybmFyZG8gSGV5bmVtYW5uIE5hc2NlbnRlcyBkYSBTaWx2YQ==",
-            #"login_url": "/login",
-            #"template_path": join(dirname(__file__), "templates"),
-            #"static_path": join(dirname(__file__), "static"),
+            if 'template_path' in settings:
+                self.loader = AppTemplateLoader(self, settings['template_path'])
+            else:
+                self.loader = AppTemplateLoader(self)
+
+            settings['template_loader'] = self.loader
+
+        #"cookie_secret": "QmVybmFyZG8gSGV5bmVtYW5uIE5hc2NlbnRlcyBkYSBTaWx2YQ==",
+        #"login_url": "/login",
+        #"template_path": join(dirname(__file__), "templates"),
+        #"static_path": join(dirname(__file__), "static"),
 
         super(AeroApp, self).__init__(handlers, **settings)
 
