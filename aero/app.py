@@ -13,8 +13,8 @@ from aero.template import AppTemplateLoader
 
 class AeroApp(tornado.web.Application):
 
-    def __init__(self, apps, **settings):
-        handlers = []
+    def __init__(self, handlers=[], apps=[], **settings):
+        handlers = list(handlers)
         self.apps = []
         if not settings:
             settings = {}

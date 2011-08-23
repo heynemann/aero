@@ -2,11 +2,16 @@
 # -*- coding: utf-8 -*-
 
 from os.path import abspath, dirname, join
+import tornado.web
 import tornado.ioloop
 from pyvows import Vows, expect
 from tornado_pyvows import TornadoHTTPContext
 
 from aero import AeroApp
+
+class HelloWorldHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.write('Hello World')
 
 @Vows.batch
 class AeroAppVows(Vows.Context):
@@ -41,6 +46,26 @@ class AeroAppVows(Vows.Context):
 
             def should_be_working(self, topic):
                 expect(topic).to_equal('WORKINGTEST')
+
+    class OverrideRoutesVows(TornadoHTTPContext):
+        def get_app(self):
+            return AeroApp([
+                (r'/hello', HelloWorldHandler)
+            ],
+            apps=[
+                'aero.apps.healthcheck'
+            ], **{
+                'template_path': abspath(join(dirname(__file__), 'templates'))
+            })
+
+        class HelloWorldURL(TornadoHTTPContext):
+            def topic(self):
+                self.http_client.fetch(self.get_url('/hello'), self.stop)
+                response = self.wait()
+                return response.body.strip()
+
+            def should_be_hello_world(self, topic):
+                expect(topic).to_equal('Hello World')
 
 
 if __name__ == '__main__':
