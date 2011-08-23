@@ -21,7 +21,6 @@ class AppTemplateLoader(BaseLoader):
         if self.root_path:
             paths.append(self.root_path)
             template_path = join(self.root_path.rstrip('/'), name.lstrip('/'))
-            print template_path
             if exists(template_path):
                 return template_path
 

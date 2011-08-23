@@ -10,6 +10,7 @@ from os.path import abspath, join, dirname, exists
 import tornado.web
 
 from aero.template import AppTemplateLoader
+from aero.static import AeroStaticFileHandler
 
 class AeroApp(tornado.web.Application):
 
@@ -37,6 +38,13 @@ class AeroApp(tornado.web.Application):
 
             settings['template_loader'] = self.loader
 
+        if 'static_path' in settings:
+            handlers.append((r"/static/(.*)", AeroStaticFileHandler, {
+                "path": "static_path" in settings and settings['static_path'] or None,
+                "apps": self.apps
+            }))
+            del settings['static_path']
+
         #"cookie_secret": "QmVybmFyZG8gSGV5bmVtYW5uIE5hc2NlbnRlcyBkYSBTaWx2YQ==",
         #"login_url": "/login",
         #"template_path": join(dirname(__file__), "templates"),
@@ -62,11 +70,17 @@ class AeroApp(tornado.web.Application):
         template_path = abspath(join(dirname(module.__file__), 'templates'))
         has_templates = exists(template_path)
 
+        static_path = abspath(join(dirname(module.__file__), 'static'))
+        has_static = exists(static_path)
+
         return {
             'name': app_name,
             'module': module,
-            'urls_module': urls,
+            'urls_module': urls_module,
             'urls': urls,
             'has_templates': has_templates,
-            'template_path': template_path
+            'template_path': template_path,
+            'has_static': has_static,
+            'static_path': static_path
         }
+
