@@ -5,3 +5,5 @@ dist
 pyVows.egg-info
 .DS_Store
 *.egg-info
+aero.coverage.xml
+pyvows.xml
