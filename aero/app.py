@@ -80,6 +80,11 @@ class AeroApp(tornado.web.Application):
                 for url in urls_module.urls:
                     urls.append(url)
 
+        listeners_module = None
+        if exists(join(app_path.rstrip('/'), 'listeners.py')):
+            listeners_module_name = '%s.listeners' % app_name
+            listeners_module = reduce(getattr, listeners_module_name.split('.')[1:], __import__(listeners_module_name))
+ 
         template_path = abspath(join(dirname(module.__file__), 'templates'))
         has_templates = exists(template_path)
 
@@ -92,6 +97,8 @@ class AeroApp(tornado.web.Application):
             'path': app_path,
             'urls_module': urls_module,
             'urls': urls,
+            'has_listeners': listeners_module is not None,
+            'listeners': listeners_module,
             'has_templates': has_templates,
             'template_path': template_path,
             'has_static': has_static,

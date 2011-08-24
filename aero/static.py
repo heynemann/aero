@@ -5,7 +5,7 @@
 # http://www.opensource.org/licenses/mit-license
 # Copyright (c) 2011 Bernardo Heynemann heynemann@gmail.com
 
-from os.path import join, abspath, exists, isdir, isfile, sep
+from os.path import join, abspath, exists, isdir, isfile, sep, split, splitext
 import os
 import datetime
 import mimetypes
@@ -103,6 +103,9 @@ class AeroStaticFileHandler(StaticFileHandler):
             'last-modified': modified,
             'mime-type': mime_type,
             'encoding': encoding,
+            'path': path,
+            'filename': split(path)[-1],
+            'extension': splitext(path)[-1].lstrip('.'),
             'contents': contents
         }
         self.write(resulting_file['contents'])
