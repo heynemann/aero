@@ -92,11 +92,20 @@ class AeroStaticFileHandler(StaticFileHandler):
 
         if not include_body:
             return
-        requested_file = open(file_path, "rb")
+
+        static_file = open(file_path, 'rb')
         try:
-            self.write(requested_file.read())
+            contents = static_file.read()
         finally:
-            requested_file.close()
+            static_file.close()
+
+        resulting_file = {
+            'last-modified': modified,
+            'mime-type': mime_type,
+            'encoding': encoding,
+            'contents': contents
+        }
+        self.write(resulting_file['contents'])
 
     def get_cache_time(self, path, modified, mime_type):
         """Override to customize cache control behavior.
