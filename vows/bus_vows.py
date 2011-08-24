@@ -8,7 +8,7 @@
 from pyvows import Vows, expect
 from tornado_pyvows import TornadoHTTPContext
 
-from aero import AeroApp
+from aero.app import AeroApp
 
 @Vows.batch
 class BusVows(Vows.Context):

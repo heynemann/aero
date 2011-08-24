@@ -6,7 +6,7 @@ from os.path import abspath, join, dirname
 from pyvows import Vows, expect
 from tornado_pyvows import TornadoHTTPContext
 
-from aero import AeroApp
+from aero.app import AeroApp
 
 STATIC_PATH = abspath(join(dirname(__file__), 'static'))
 
