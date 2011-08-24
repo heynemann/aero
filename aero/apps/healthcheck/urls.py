@@ -8,5 +8,5 @@
 from aero.apps.healthcheck.handlers import HealthcheckHandler
 
 urls = (
-    (r'/healthcheck', HealthcheckHandler),
+    (r'/healthcheck/?', HealthcheckHandler),
 )
