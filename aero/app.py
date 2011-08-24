@@ -55,8 +55,8 @@ class AeroApp(tornado.web.Application):
         for app in self.apps:
             if not app['has_listeners']: continue
 
-            if hasattr(app['listeners_module'], 'listen'):
-                app['listeners_module'].listen(self)
+            if hasattr(app['listeners'], 'listen'):
+                app['listeners'].listen(self)
 
         self.publish('app_started', app=self)
         super(AeroApp, self).__init__(handlers, **settings)
