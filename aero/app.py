@@ -8,6 +8,7 @@
 from os.path import abspath, join, dirname, exists
 
 import tornado.web
+from cyrusbus import Bus
 
 from aero.template import AppTemplateLoader
 from aero.static import AeroStaticFileHandler
@@ -17,6 +18,7 @@ class AeroApp(tornado.web.Application):
     def __init__(self, handlers=[], **settings):
         handlers = list(handlers)
 
+        self.bus = Bus()
         self.apps = []
         if not settings:
             settings = {}
@@ -51,6 +53,12 @@ class AeroApp(tornado.web.Application):
         #"static_path": join(dirname(__file__), "static"),
 
         super(AeroApp, self).__init__(handlers, **settings)
+
+    def subscribe(self, key, callback, force=False):
+        return self.bus.subscribe(key, callback, force)
+
+    def publish(self, key, *args, **kwargs):
+        return self.bus.publish(key, *args, **kwargs)
 
     def __load_app(self, app_name):
         try:
