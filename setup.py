@@ -6,7 +6,7 @@
 # Copyright (c) 2011 Bernardo Heynemann heynemann@gmail.com
 
 from os.path import exists
-from setuptools import setup
+from setuptools import setup, find_packages
 
 from aero.version import __version__
 
@@ -33,11 +33,12 @@ setup(
                    'Operating System :: POSIX :: Linux',
                    'Programming Language :: Python :: 2.6',
     ],
-    packages = ['aero'],
-    package_dir = {"aero": "aero"},
+    packages = find_packages(),
+    include_package_data = True,
 
     install_requires = ['tornado',
                         'cyrusbus==0.1.0'],
+
     tests_require = ['coverage',
                      'tornado-pyvows==0.3.0'],
 

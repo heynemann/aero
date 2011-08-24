@@ -1,0 +1,13 @@
+prune dist
+prune build
+recursive-include aero *.txt
+recursive-include aero *.html
+recursive-include aero *.htm
+recursive-include aero *.gif
+recursive-include aero *.jpg
+recursive-include aero *.jpeg
+recursive-include aero *.png
+recursive-include aero *.css*
+recursive-include aero *.less
+recursive-include aero *.js*
+
