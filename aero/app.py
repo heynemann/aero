@@ -52,6 +52,12 @@ class AeroApp(tornado.web.Application):
         #"template_path": join(dirname(__file__), "templates"),
         #"static_path": join(dirname(__file__), "static"),
 
+        for app in self.apps:
+            if not app['has_listeners']: continue
+
+            if hasattr(app['listeners_module'], 'listen'):
+                app['listeners_module'].listen(self)
+
         super(AeroApp, self).__init__(handlers, **settings)
 
     def subscribe(self, key, callback, force=False):
@@ -84,7 +90,7 @@ class AeroApp(tornado.web.Application):
         if exists(join(app_path.rstrip('/'), 'listeners.py')):
             listeners_module_name = '%s.listeners' % app_name
             listeners_module = reduce(getattr, listeners_module_name.split('.')[1:], __import__(listeners_module_name))
- 
+
         template_path = abspath(join(dirname(module.__file__), 'templates'))
         has_templates = exists(template_path)
 
