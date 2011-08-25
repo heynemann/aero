@@ -32,7 +32,7 @@ class AppTemplateLoader(BaseLoader):
             if exists(template_path):
                 return template_path
 
-        raise RuntimeError('Template with path %s could not be found in any of the available template paths: %s.' % ", ".join(paths))
+        raise RuntimeError('Template with path %s could not be found in any of the available template paths: %s.' % (name, ", ".join(paths)))
 
     def _create_template(self, name):
         f = open(name, "r")
