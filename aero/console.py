@@ -185,7 +185,7 @@ class CollectStaticCommand(BaseCommand):
                     }
                     application.publish('before-static', resulting_file)
                     write(resulting_file)
-                    application.publish('post-static', resulting_file)
+                    application.publish('after-static', resulting_file)
                     return
 
 COMMANDS = {

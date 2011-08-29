@@ -110,8 +110,8 @@ class AeroStaticFileHandler(StaticFileHandler):
         }
 
         self.application.publish('before-static', resulting_file)
-
         self.write(resulting_file['contents'])
+        self.application.publish('after-static', resulting_file)
 
     def get_cache_time(self, path, modified, mime_type):
         """Override to customize cache control behavior.
