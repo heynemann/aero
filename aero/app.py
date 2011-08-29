@@ -23,8 +23,8 @@ class AeroApp(tornado.web.Application):
         if not settings:
             settings = {}
 
-        if 'apps' in settings:
-            apps = settings['apps']
+        if 'installed_apps' in settings:
+            apps = settings['installed_apps']
 
             for app_module_name in apps:
                 self.apps.append(self.__load_app(app_module_name))
