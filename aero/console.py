@@ -65,7 +65,13 @@ class BaseCommand(object):
         return conf_module
 
     def ls(self, path):
-        return [path for path in os.listdir(path) if isfile(path)]
+        files = []
+        for root, dirs, files in os.walk(path):
+            for static_path in files:
+                if isfile(static_path):
+                    files.append(static_path)
+
+        return files
 
 class AeroServerCommand(BaseCommand):
     def __init__(self, parser):
@@ -125,6 +131,8 @@ class CollectStaticCommand(BaseCommand):
         if not exists(self.options.output):
             os.makedirs(self.options.output)
 
+        print 'Copying static files to %s' % self.options.output
+
         root = None
         if hasattr(conf_module, 'static_path'):
             root = conf_module.static_path
@@ -132,14 +140,17 @@ class CollectStaticCommand(BaseCommand):
                 self.write_static_to(self.options.output, static, root=root)
 
         for app in application.apps:
-            for static in self.ls(app['path']):
+            for static in self.ls(join(app['path'], 'static')):
                 self.write_static_to(self.options.output, static, root=root, apps=application.apps)
+
+        print 'Static files copied.'
 
     def write_static_to(self, output, static, root=None, apps=[], search=True):
         static = static.lstrip('/')
         target_path = abspath(join(output.rstrip('/'), static))
 
         def write(path):
+            print "Writing '%s' to '%s'" % (path, target_path)
             with open(target_path, 'w') as target:
                 with open(path, 'rb') as source:
                     target.write(source.read())
@@ -147,14 +158,12 @@ class CollectStaticCommand(BaseCommand):
         if root:
             path = abspath(join(root, static))
             if exists(path):
-                print path
                 write(path)
                 return
 
         if apps:
             for app in apps:
                 path = abspath(join(app['path'], 'static', static))
-                print path
                 if exists(path):
                     write(path)
                     return
