@@ -52,7 +52,7 @@ def main(args=sys.argv):
 
 class BaseCommand(object):
     def load_conf(self, conf_path):
-        conf = abspath(conf_path)
+        conf = conf_path and abspath(conf_path) or None
         if not conf or not exists(conf):
             conf = abspath(join(dirname(curdir), 'aero.conf'))
             if not exists(conf):
