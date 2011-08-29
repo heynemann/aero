@@ -47,11 +47,6 @@ class AeroApp(tornado.web.Application):
         if 'static_path' in settings:
             del settings['static_path']
 
-        #"cookie_secret": "QmVybmFyZG8gSGV5bmVtYW5uIE5hc2NlbnRlcyBkYSBTaWx2YQ==",
-        #"login_url": "/login",
-        #"template_path": join(dirname(__file__), "templates"),
-        #"static_path": join(dirname(__file__), "static"),
-
         for app in self.apps:
             if not app['has_listeners']: continue
 

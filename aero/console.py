@@ -6,8 +6,9 @@
 # Copyright (c) 2011 Bernardo Heynemann heynemann@gmail.com
 
 import sys
-from os.path import abspath, dirname, join, exists, split
+from os.path import abspath, dirname, join, exists, split, isfile
 from os import curdir
+import os
 import optparse
 import imp
 
@@ -48,7 +49,25 @@ def main(args=sys.argv):
 
     command.run()
 
-class AeroServerCommand(object):
+class BaseCommand(object):
+    def load_conf(self, conf_path):
+        conf = abspath(conf_path)
+        if not conf or not exists(conf):
+            conf = abspath(join(dirname(curdir), 'aero.conf'))
+            if not exists(conf):
+                return None
+
+        conf_file = split(conf)[-1]
+        conf_path = dirname(conf)
+        conf_module = imp.load_source(conf_file, conf, open(conf))
+        os.remove(join(dirname(conf), "%sc" % conf_file))
+
+        return conf_module
+
+    def ls(self, path):
+        return [path for path in os.listdir(path) if isfile(path)]
+
+class AeroServerCommand(BaseCommand):
     def __init__(self, parser):
         self.parser = parser
 
@@ -59,16 +78,10 @@ class AeroServerCommand(object):
         self.parser.add_option("-c", "--conf", dest="conf", default=None, help = "The path for the aero.conf file. If not specified, defaults to the app folder [default: %default]." )
 
     def run(self):
-        conf = abspath(self.options.conf)
-        if not conf or not exists(conf):
-            conf = abspath(join(dirname(curdir), 'aero.conf'))
-            if not exists(conf):
-                print "The configuration file must be specified and be present."
-                return
-
-        conf_file = split(conf)[-1]
-        conf_path = dirname(conf)
-        conf_module = imp.load_source(conf_file, conf_path, open(conf))
+        conf_module = self.load_conf(self.options.conf)
+        if not conf_module:
+            print "The configuration file must be specified and be present."
+            return
 
         settings = {}
         for key in dir(conf_module):
@@ -92,16 +105,63 @@ class AeroServerCommand(object):
             print "-- aero closed by user interruption --"
 
 
-class CollectStaticCommand(object):
+class CollectStaticCommand(BaseCommand):
     def __init__(self, parser):
         self.parser = parser
 
     def configure(self):
         self.parser.add_option("-c", "--conf", dest="conf", default=None, help = "The path for the aero.conf file. If not specified, defaults to the app folder [default: %default]." )
+        self.parser.add_option("-o", "--output", dest="output", default=None, help = "The path for the collected statics. If not specified, defaults to a 'static' folder in the app folder [default: %default]." )
 
+    def run(self):
+        conf_module = self.load_conf(self.options.conf)
+        settings = {}
+        for key in dir(conf_module):
+            if not key.startswith('_') and hasattr(conf_module, key):
+                settings[key] = getattr(conf_module, key)
+
+        application = AeroApp(**settings)
+
+        if not exists(self.options.output):
+            os.makedirs(self.options.output)
+
+        root = None
+        if hasattr(conf_module, 'static_path'):
+            root = conf_module.static_path
+            for static in self.ls(root):
+                self.write_static_to(self.options.output, static, root=root)
+
+        for app in application.apps:
+            for static in self.ls(app['path']):
+                self.write_static_to(self.options.output, static, root=root, apps=application.apps)
+
+    def write_static_to(self, output, static, root=None, apps=[], search=True):
+        static = static.lstrip('/')
+        target_path = abspath(join(output.rstrip('/'), static))
+
+        def write(path):
+            with open(target_path, 'w') as target:
+                with open(path, 'rb') as source:
+                    target.write(source.read())
+
+        if root:
+            path = abspath(join(root, static))
+            if exists(path):
+                print path
+                write(path)
+                return
+
+        if apps:
+            for app in apps:
+                path = abspath(join(app['path'], 'static', static))
+                print path
+                if exists(path):
+                    write(path)
+                    return
 
 COMMANDS = {
-    'serve': AeroServerCommand
+    'serve': AeroServerCommand,
+    'collectstatic': CollectStaticCommand
 }
 
 if __name__ == "__main__":

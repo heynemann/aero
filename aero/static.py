@@ -109,7 +109,7 @@ class AeroStaticFileHandler(StaticFileHandler):
             'contents': contents
         }
 
-        self.application.publish('pre-publish-static', resulting_file)
+        self.application.publish('before-static', resulting_file)
 
         self.write(resulting_file['contents'])
 
