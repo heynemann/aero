@@ -108,6 +108,9 @@ class AeroStaticFileHandler(StaticFileHandler):
             'extension': splitext(path)[-1].lstrip('.'),
             'contents': contents
         }
+
+        self.application.publish('pre-publish-static', resulting_file)
+
         self.write(resulting_file['contents'])
 
     def get_cache_time(self, path, modified, mime_type):
