@@ -92,6 +92,14 @@ class AeroServerCommand(object):
             print "-- aero closed by user interruption --"
 
 
+class CollectStaticCommand(object):
+    def __init__(self, parser):
+        self.parser = parser
+
+    def configure(self):
+        self.parser.add_option("-c", "--conf", dest="conf", default=None, help = "The path for the aero.conf file. If not specified, defaults to the app folder [default: %default]." )
+
+
 COMMANDS = {
     'serve': AeroServerCommand
 }

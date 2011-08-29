@@ -28,7 +28,7 @@ class AeroStaticFileVows(Vows.Context):
 
     class AppWithoutRootPath(TornadoHTTPContext):
         def get_app(self):
-            return AeroApp(apps=[
+            return AeroApp(installed_apps=[
                     'fixtures.apps.staticapp'
                 ])
 
@@ -43,7 +43,7 @@ class AeroStaticFileVows(Vows.Context):
 
     class WithAppAndRootPath(TornadoHTTPContext):
         def get_app(self):
-            return AeroApp(apps=[
+            return AeroApp(installed_apps=[
                     'fixtures.apps.staticapp'
                 ], static_path=STATIC_PATH)
 

@@ -18,7 +18,7 @@ class HelloWorldHandler(tornado.web.RequestHandler):
 class AeroAppVows(Vows.Context):
     class HealthCheckVows(TornadoHTTPContext):
         def get_app(self):
-            return AeroApp(apps=[
+            return AeroApp(installed_apps=[
                 'aero.apps.healthcheck'
             ])
 
@@ -33,7 +33,7 @@ class AeroAppVows(Vows.Context):
 
     class TemplateOverrideVows(TornadoHTTPContext):
         def get_app(self):
-            return AeroApp(apps=[
+            return AeroApp(installed_apps=[
                 'aero.apps.healthcheck'
             ], **{
                 'template_path': abspath(join(dirname(__file__), 'templates'))
@@ -53,7 +53,7 @@ class AeroAppVows(Vows.Context):
             return AeroApp([
                 (r'/hello', HelloWorldHandler)
             ],
-            apps=[
+            installed_apps=[
                 'aero.apps.healthcheck'
             ], **{
                 'template_path': abspath(join(dirname(__file__), 'templates'))
@@ -70,7 +70,7 @@ class AeroAppVows(Vows.Context):
 
 
 if __name__ == '__main__':
-    AeroApp(apps=[
+    AeroApp(installed_apps=[
         'aero.apps.healthcheck'
     ], **{
         'template_path': abspath(join(dirname(__file__), 'templates'))
