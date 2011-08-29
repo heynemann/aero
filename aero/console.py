@@ -6,7 +6,7 @@
 # Copyright (c) 2011 Bernardo Heynemann heynemann@gmail.com
 
 import sys
-from os.path import abspath, dirname, join, exists, split, isfile
+from os.path import abspath, dirname, join, exists, split, splitext, isfile
 from os import curdir
 import os
 import optparse
@@ -137,35 +137,54 @@ class CollectStaticCommand(BaseCommand):
         if hasattr(conf_module, 'static_path'):
             root = conf_module.static_path
             for static in self.ls(root):
-                self.write_static_to(self.options.output, static, root=root)
+                self.write_static_to(self.options.output, static, application, root=root)
 
         for app in application.apps:
             for static in self.ls(join(app['path'], 'static')):
-                self.write_static_to(self.options.output, static, root=root, apps=application.apps)
+                self.write_static_to(self.options.output, static, application, root=root, apps=application.apps)
 
         print 'Static files copied.'
 
-    def write_static_to(self, output, static, root=None, apps=[], search=True):
+    def write_static_to(self, output, static, application, root=None, apps=[], search=True):
         static = static.lstrip('/')
         target_path = abspath(join(output.rstrip('/'), static))
 
-        def write(path):
-            print "Writing '%s' to '%s'" % (path, target_path)
-            with open(target_path, 'w') as target:
-                with open(path, 'rb') as source:
-                    target.write(source.read())
+        def write(file_data):
+            print "Writing '%s' to '%s'" % (file_data['path'], file_data['target_path'])
+            with open(file_data['target_path'], 'w') as target:
+                target.write(file_data['contents'])
 
         if root:
             path = abspath(join(root, static))
             if exists(path):
-                write(path)
+                contents = open(path).read()
+                resulting_file = {
+                    'path': path,
+                    'filename': split(path)[-1],
+                    'extension': splitext(path)[-1].lstrip('.'),
+                    'contents': contents,
+                    'target_path': target_path
+                }
+                application.publish('before-static', resulting_file)
+                write(resulting_file)
+                application.publish('post-static', resulting_file)
                 return
 
         if apps:
             for app in apps:
                 path = abspath(join(app['path'], 'static', static))
                 if exists(path):
-                    write(path)
+                    contents = open(path).read()
+                    resulting_file = {
+                        'path': path,
+                        'filename': split(path)[-1],
+                        'extension': splitext(path)[-1].lstrip('.'),
+                        'contents': contents,
+                        'target_path': target_path
+                    }
+                    application.publish('before-static', resulting_file)
+                    write(resulting_file)
+                    application.publish('post-static', resulting_file)
                     return
 
 COMMANDS = {
