@@ -6,11 +6,12 @@
 # Copyright (c) 2011 Bernardo Heynemann heynemann@gmail.com
 
 import sys
-from os.path import abspath, dirname, join, exists, split, splitext, isfile
+from os.path import abspath, dirname, join, exists, split, splitext
 from os import curdir
 import os
 import optparse
 import imp
+import fnmatch
 
 import tornado.ioloop
 from tornado.httpserver import HTTPServer
@@ -110,6 +111,7 @@ class CollectStaticCommand(BaseCommand):
     def configure(self):
         self.parser.add_option("-c", "--conf", dest="conf", default=None, help = "The path for the aero.conf file. If not specified, defaults to the app folder [default: %default]." )
         self.parser.add_option("-o", "--output", dest="output", default=None, help = "The path for the collected statics. If not specified, defaults to a 'static' folder in the app folder [default: %default]." )
+        self.parser.add_option("-i", "--ignore", dest="ignore", action='append', default=['.DS_Store', '*.swp', '*.swo'], help = "File patterns to ignore [default: %default]." )
 
     def run(self):
         conf_module = self.load_conf(self.options.conf)
@@ -124,12 +126,20 @@ class CollectStaticCommand(BaseCommand):
             os.makedirs(self.options.output)
 
         print 'Copying static files to %s' % self.options.output
+        print 'Ignoring %s' % ', '.join(self.options.ignore)
+        print
 
         root = None
         if hasattr(conf_module, 'static_path'):
             root = conf_module.static_path
             for root, dirs, files in os.walk(root):
                 for static in files:
+                    ignore = False
+                    for pattern in self.options.ignore:
+                        if fnmatch.fnmatch(static, pattern):
+                            ignore = True
+                            break
+                    if ignore: continue
                     static = join(root, static).replace(root, '').lstrip('/')
                     self.write_static_to(self.options.output, static, application, root=root)
 
@@ -137,9 +147,17 @@ class CollectStaticCommand(BaseCommand):
             static_files_path = join(app['path'], 'static')
             for root, dirs, files in os.walk(static_files_path):
                 for static in files:
+                    ignore = False
+                    for pattern in self.options.ignore:
+                        if fnmatch.fnmatch(static, pattern):
+                            ignore = True
+                            break
+                    if ignore: continue
+
                     static = join(root, static).replace(static_files_path, '').lstrip('/')
                     self.write_static_to(self.options.output, static, application, root=root, apps=application.apps)
 
+        print
         print 'Static files copied.'
 
     def write_static_to(self, output, static, application, root=None, apps=[], search=True):
