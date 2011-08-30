@@ -65,15 +65,6 @@ class BaseCommand(object):
 
         return conf_module
 
-    def ls(self, path):
-        files = []
-        for root, dirs, files in os.walk(path):
-            for static_path in files:
-                if isfile(static_path):
-                    files.append(static_path)
-
-        return files
-
 class AeroServerCommand(BaseCommand):
     def __init__(self, parser):
         self.parser = parser
@@ -137,12 +128,17 @@ class CollectStaticCommand(BaseCommand):
         root = None
         if hasattr(conf_module, 'static_path'):
             root = conf_module.static_path
-            for static in self.ls(root):
-                self.write_static_to(self.options.output, static, application, root=root)
+            for root, dirs, files in os.walk(root):
+                for static in files:
+                    static = join(root, static).replace(root, '').lstrip('/')
+                    self.write_static_to(self.options.output, static, application, root=root)
 
         for app in application.apps:
-            for static in self.ls(join(app['path'], 'static')):
-                self.write_static_to(self.options.output, static, application, root=root, apps=application.apps)
+            static_files_path = join(app['path'], 'static')
+            for root, dirs, files in os.walk(static_files_path):
+                for static in files:
+                    static = join(root, static).replace(static_files_path, '').lstrip('/')
+                    self.write_static_to(self.options.output, static, application, root=root, apps=application.apps)
 
         print 'Static files copied.'
 
@@ -152,6 +148,8 @@ class CollectStaticCommand(BaseCommand):
 
         def write(file_data):
             print "Writing '%s' to '%s'" % (file_data['path'], file_data['target_path'])
+            if not exists(dirname(file_data['target_path'])):
+                os.makedirs(dirname(file_data['target_path']))
             with open(file_data['target_path'], 'w') as target:
                 target.write(file_data['contents'])
 
