@@ -33,9 +33,10 @@ def main(args=sys.argv):
     args.remove(command)
 
     if not command in COMMANDS:
-        print 'The command %s is not supported by aero. Available commands are: %s' % (command, ', '.join(COMMANDS.keys()))
-        print 'If you want help on a specific command, type aero <<command>> -h, like aero serve -h'
-        return
+        command = 'serve'
+        #print 'The command %s is not supported by aero. Available commands are: %s' % (command, ', '.join(COMMANDS.keys()))
+        #print 'If you want help on a specific command, type aero <<command>> -h, like aero serve -h'
+        #return
 
     command = COMMANDS[command]
 
