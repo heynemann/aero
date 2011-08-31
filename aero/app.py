@@ -62,6 +62,13 @@ class AeroApp(tornado.web.Application):
     def publish(self, key, *args, **kwargs):
         return self.bus.publish(key, *args, **kwargs)
 
+    def importable(self, module):
+        try:
+            __import__(module)
+            return True
+        except ImportError:
+            return False
+
     def __load_app(self, app_name):
         try:
             module = reduce(getattr, app_name.split('.')[1:], __import__(app_name))
@@ -69,13 +76,14 @@ class AeroApp(tornado.web.Application):
             print "Could not import app %s! Error:" % app_name
             raise err
 
+        import ipdb;ipdb.set_trace()
         app_path = abspath(dirname(module.__file__))
 
         urls = []
         urls_module = None
 
-        if exists(join(app_path.rstrip('/'), 'urls.py')):
-            urls_app_name = '%s.urls' % app_name
+        urls_app_name = '%s.urls' % app_name
+        if self.importable(urls_app_name):
             urls_module = reduce(getattr, urls_app_name.split('.')[1:], __import__(urls_app_name))
 
             if hasattr(urls_module, 'urls'):
@@ -83,8 +91,8 @@ class AeroApp(tornado.web.Application):
                     urls.append(url)
 
         listeners_module = None
-        if exists(join(app_path.rstrip('/'), 'listeners.py')):
-            listeners_module_name = '%s.listeners' % app_name
+        listeners_module_name = '%s.listeners' % app_name
+        if self.importable(listeners_module_name):
             listeners_module = reduce(getattr, listeners_module_name.split('.')[1:], __import__(listeners_module_name))
 
         template_path = abspath(join(dirname(module.__file__), 'templates'))
