@@ -76,7 +76,6 @@ class AeroApp(tornado.web.Application):
             print "Could not import app %s! Error:" % app_name
             raise err
 
-        import ipdb;ipdb.set_trace()
         app_path = abspath(dirname(module.__file__))
 
         urls = []
