@@ -53,8 +53,8 @@ class AeroApp(tornado.web.Application):
             if hasattr(app['listeners'], 'listen'):
                 app['listeners'].listen(self)
 
-        self.publish('app_started', app=self)
         super(AeroApp, self).__init__(handlers, **settings)
+        self.publish('app_started', app=self)
 
     def subscribe(self, key, callback, force=False):
         return self.bus.subscribe(key, callback, force)
