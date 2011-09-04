@@ -45,7 +45,7 @@ class AeroApp(tornado.web.Application):
             "apps": self.apps
         }))
         if 'static_path' in settings:
-            del settings['static_path']
+            settings.pop('static_path')
 
         for app in self.apps:
             if not app['has_listeners']: continue

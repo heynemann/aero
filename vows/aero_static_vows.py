@@ -5,17 +5,21 @@ from os.path import abspath, join, dirname
 
 from pyvows import Vows, expect
 from tornado_pyvows import TornadoHTTPContext
+import tornado.ioloop
 
 from aero.app import AeroApp
 
 STATIC_PATH = abspath(join(dirname(__file__), 'static'))
+app = AeroApp(static_path=STATIC_PATH, installed_apps=[
+    'aero.apps.static'
+])
 
 @Vows.batch
 class AeroStaticFileVows(Vows.Context):
 
     class WithRootPath(TornadoHTTPContext):
         def get_app(self):
-            return AeroApp(static_path=STATIC_PATH)
+            return app
 
         class CheckStaticURL(TornadoHTTPContext):
             def topic(self):
@@ -56,3 +60,6 @@ class AeroStaticFileVows(Vows.Context):
             def should_be_working(self, topic):
                 expect(topic).to_equal('aero')
 
+if __name__ == '__main__':
+    app.listen(3333)
+    tornado.ioloop.IOLoop.instance().start()
