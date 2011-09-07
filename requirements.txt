@@ -1,2 +1,4 @@
 tornado
 cyrusbus==0.1.0
+slimmer==0.1.30
+clevercss==0.1

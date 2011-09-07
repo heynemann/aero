@@ -32,40 +32,49 @@ class AeroStaticFileHandler(StaticFileHandler):
             path = path.replace("/", sep)
 
         path = path.lstrip('/')
-        file_path = None
+        file_path = {
+            'path': path
+        }
         if self.root:
-            file_path = abspath(join(self.root.rstrip('/'), path))
+            file_path['path'] = abspath(join(self.root.rstrip('/'), path))
 
-        if not file_path or not exists(file_path):
+        if not file_path['path'] or not exists(file_path['path']):
             # look in each app's static dir
             for app in self.apps:
                 if not app['has_static']:
                     continue
-                file_path = abspath(join(app['static_path'].rstrip('/'), path))
-                if exists(file_path):
+                file_path['path'] = abspath(join(app['static_path'].rstrip('/'), path))
+                if exists(file_path['path']):
                     break
 
-        if file_path and isdir(file_path) and self.default_filename is not None:
+        if file_path['path'] and isdir(file_path['path']) and self.default_filename is not None:
             # need to look at the request.path here for when path is empty
             # but there is some prefix to the path that was already
             # trimmed by the routing
             if not self.request.path.endswith("/"):
                 self.redirect(self.request.path + "/")
                 return
-            file_path = join(file_path, self.default_filename)
+            file_path['path'] = join(file_path['path'], self.default_filename)
 
 
-        if not file_path or not exists(file_path):
+        file_path['original'] = str(file_path['path'])
+
+        # allow apps to redirect the path to find the file.
+        if not file_path['path'] or not exists(file_path['path']):
+            self.application.publish('static-not-found', file_path)
+
+        if not file_path['path'] or not exists(file_path['path']):
             raise HTTPError(404)
-        if not file_path or not isfile(file_path):
+
+        if not file_path['path'] or not isfile(file_path['path']):
             raise HTTPError(403, "%s is not a file", path)
 
-        stat_result = os.stat(file_path)
+        stat_result = os.stat(file_path['path'])
         modified = datetime.datetime.fromtimestamp(stat_result[ST_MTIME])
 
         self.set_header("Last-Modified", modified)
 
-        mime_type, encoding = mimetypes.guess_type(file_path)
+        mime_type, encoding = mimetypes.guess_type(file_path['path'])
         if mime_type:
             self.set_header("Content-Type", mime_type)
 
@@ -93,7 +102,7 @@ class AeroStaticFileHandler(StaticFileHandler):
         if not include_body:
             return
 
-        static_file = open(file_path, 'rb')
+        static_file = open(file_path['path'], 'rb')
         try:
             contents = static_file.read()
         finally:
@@ -103,7 +112,7 @@ class AeroStaticFileHandler(StaticFileHandler):
             'last-modified': modified,
             'mime-type': mime_type,
             'encoding': encoding,
-            'path': path,
+            'path': file_path,
             'filename': split(path)[-1],
             'extension': splitext(path)[-1].lstrip('.'),
             'contents': contents

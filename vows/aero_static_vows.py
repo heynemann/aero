@@ -12,7 +12,7 @@ from aero.app import AeroApp
 STATIC_PATH = abspath(join(dirname(__file__), 'static'))
 app = AeroApp(static_path=STATIC_PATH, installed_apps=[
     'aero.apps.static'
-])
+], debug=True, minify_css=True, minify_js=True)
 
 @Vows.batch
 class AeroStaticFileVows(Vows.Context):
