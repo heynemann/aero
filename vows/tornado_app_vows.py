@@ -71,9 +71,13 @@ class AeroAppVows(Vows.Context):
 
 if __name__ == '__main__':
     AeroApp(installed_apps=[
-        'aero.apps.healthcheck'
+        'aero.apps.static',
+        'aero.apps.healthcheck',
     ], **{
-        'template_path': abspath(join(dirname(__file__), 'templates'))
+        'template_path': abspath(join(dirname(__file__), 'templates')),
+        'minify_js': True,
+        'minify_css': True,
+        'minify_html': True
     }).listen(8888)
 
     tornado.ioloop.IOLoop.instance().start()

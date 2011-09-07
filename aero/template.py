@@ -38,4 +38,12 @@ class AppTemplateLoader(BaseLoader):
         f = open(name, "r")
         template = Template(f.read(), name=name, loader=self)
         f.close()
-        return template
+
+        template_data = {
+            'name': name,
+            'template': template
+        }
+
+        self.app.publish('template-created', template_data)
+
+        return template_data['template']
